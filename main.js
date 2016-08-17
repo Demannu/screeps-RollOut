@@ -1,5 +1,5 @@
 // Demannu Roll-Out Strategy
-// 8/15/2016; Michael Gagliano
+// 8/17/2016; 
 
 /* Required Sub-Modules
     Behaviors:
@@ -24,6 +24,7 @@ var roleHarvester = require('role.harvester');
 var roleUpgrader = require('role.upgrader');
 var roleSpawner = require('role.spawner');
 var utility = require('utility.maintain');
+var powerUtility = require('behavior.power');
 // End Module Requirements
 
 module.exports.loop = function () {
@@ -32,26 +33,7 @@ module.exports.loop = function () {
         var thisRoom = Game.spawns[thisSpawner].room;
         var thisSources = utility.findSources(thisSpawner);
         if(!Game.rooms[thisRoom.name].memory.mapped){
-            for(var source in thisSources){
-                console.log("source" + source);
-                for(var x = -1; x < 2; x++){
-                    console.log("x " + x);
-                    for(var y = -1; y <2; y++){
-                        console.log("y " + y);
-                        var origin_x = thisSources[source].pos.x + x;
-                        var origin_y = thisSources[source].pos.y + y;
-                        var terrain = Game.map.getTerrainAt(origin_x, origin_y, thisRoom.name);
-                        switch(terrain){
-                            case 'plain':
-                            case 'swamp':
-                                var finalPOS = new RoomPosition(origin_x, origin_y, thisRoom.name).createFlag();
-                                console.log(finalPOS);
-                                Game.rooms[thisRoom.name].memory.mapped = true;
-                                break;
-                        }
-                    }
-                }
-            }
+            powerUtility.sourceSlots(thisSpawner,thisRoom,thisSources);
         }
     }
     /* Attach C&C to Objects */
@@ -62,6 +44,9 @@ module.exports.loop = function () {
     for(var item in list) {
         for(var name in Game[list[item]]) {
             var thing = Game[list[item]][name];
+            if(list[item] == 'spawns'){
+                thing.memory.role='spawners';
+            }
             switch(thing.memory.role){
                 case "spawners":
                     roleSpawner.run(thing);

@@ -12,7 +12,7 @@ var utility = {
     			break;
     	}
     },
-    extPOS: function() { return [10,20,3,5]; },     // X,Y,Width,Height of extension field
+    extPOS: function() { return [21,24,2,3]; },     // X,Y,Width,Height of extension field
     
     sweepCreep: function(){
         for(var name in Memory.creeps) {

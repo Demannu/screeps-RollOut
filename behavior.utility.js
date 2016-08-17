@@ -27,6 +27,10 @@ var creepUtility = {
         }
 
     },
+    findFlags: function(creep) {
+        var result = _(Game.flags).filter({ memory: { taken: false}}).value();
+        return result;
+    },
     moveTargets: function(creep,targets,task) {
         if(targets.length > 0) {
             var target = creep.pos.findClosestByRange(targets);
@@ -34,6 +38,21 @@ var creepUtility = {
                 creep.moveTo(target);
             }
         }
+    },
+    moveTo: function(creep, target){
+        creep.moveTo(target);
+    },
+    reserveSlot: function(creep, flag){
+        flag.memory.taken = true;
+        creep.memory.assigned = true;
+        console.log('The flag ID is: ' + flag.pos);
+        creep.memory.flagID = flag.pos;
+        
+    },
+    releaseSlot: function(creep,flag){
+        flag[0].memory.taken = false;
+        creep.memory.assigned = false;
+        creep.memory.flagID = false;
     }
 };
 

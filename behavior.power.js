@@ -14,19 +14,17 @@ var powerUtility = {
     },
     sourceSlots: function(thisSpawner,thisRoom,thisSources) {
         for(var source in thisSources){
-            console.log("source" + source);
             for(var x = -1; x < 2; x++){
-                console.log("x " + x);
                 for(var y = -1; y <2; y++){
-                    console.log("y " + y);
                     var origin_x = thisSources[source].pos.x + x;
                     var origin_y = thisSources[source].pos.y + y;
                     var terrain = Game.map.getTerrainAt(origin_x, origin_y, thisRoom.name);
                     switch(terrain){
                         case 'plain':
                         case 'swamp':
-                            var finalPOS = new RoomPosition(origin_x, origin_y, thisRoom.name).createFlag();
-                            console.log(finalPOS);
+                            var flagName = 'Source_Slot' + Math.floor(Math.random() *100);
+                            var finalPOS = new RoomPosition(origin_x, origin_y, thisRoom.name).createFlag(flagName);
+                            Game.flags[flagName].memory.taken = false;
                             Game.rooms[thisRoom.name].memory.mapped = true;
                             break;
                     }

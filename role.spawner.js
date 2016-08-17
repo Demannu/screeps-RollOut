@@ -1,8 +1,9 @@
 var powerUtility = require('behavior.power');
+var utility = require('utility.maintain');
 var roleSpawner = {
     run: function(spawn) {
         if(spawn.memory.powered){
-            powerUtility.buildExtensions(spawn, [20,30,2,2]);
+            powerUtility.buildExtensions(spawn, utility.extPOS());
         }
         this.creepLogic(spawn);
     },
