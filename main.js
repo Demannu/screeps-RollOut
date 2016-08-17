@@ -1,5 +1,4 @@
 // Demannu Roll-Out Strategy
-// 8/15/2016; Michael Gagliano
 
 /* Required Sub-Modules
     Behaviors:
