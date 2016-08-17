@@ -1,18 +1,38 @@
 var powerUtility = {
-    run: function(spawn) {
+    buildExtensions: function(spawn, data) {
         var utility = require('utility.maintain');
-        var data = utility.extPOS()
         var X = data[0];
         var Y = data[1];
         var W = data[2];
         var H = data[3];
-        console.log(data);
         for(var i = 0; i < W; i++) {
             for(var x = 0; x < H; x++){
                 spawn.room.createConstructionSite((X + i), (Y + x), STRUCTURE_EXTENSION);
             }
         }
     spawn.memory.powered = false;
+    },
+    sourceSlots: function(thisSpawner,thisRoom,thisSources) {
+        for(var source in thisSources){
+            console.log("source" + source);
+            for(var x = -1; x < 2; x++){
+                console.log("x " + x);
+                for(var y = -1; y <2; y++){
+                    console.log("y " + y);
+                    var origin_x = thisSources[source].pos.x + x;
+                    var origin_y = thisSources[source].pos.y + y;
+                    var terrain = Game.map.getTerrainAt(origin_x, origin_y, thisRoom.name);
+                    switch(terrain){
+                        case 'plain':
+                        case 'swamp':
+                            var finalPOS = new RoomPosition(origin_x, origin_y, thisRoom.name).createFlag();
+                            console.log(finalPOS);
+                            Game.rooms[thisRoom.name].memory.mapped = true;
+                            break;
+                    }
+                }
+            }
+        }
     }
 };
 

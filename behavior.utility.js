@@ -1,4 +1,14 @@
 var creepUtility = {
+    doWork: function(creep,job) {
+        if(creep.memory[job] && creep.carry.energy == 0) {
+            creep.memory[job] = false;
+            creep.say(job);
+        }
+        if(!creep.memory[job] && creep.carry.energy == creep.carryCapacity) {
+            creep.memory[job] = true;
+            creep.say(job);
+        }
+    },
     findEnergySource: function(creep) {
         var sources = creep.room.find(FIND_SOURCES);
         if(creep.harvest(sources[0]) == ERR_NOT_IN_RANGE) {
@@ -16,16 +26,6 @@ var creepUtility = {
             creep.moveTo(target);           
         }
 
-    },
-    doWork: function(creep,job) {
-        if(creep.memory[job] && creep.carry.energy == 0) {
-            creep.memory[job] = false;
-            creep.say(job);
-        }
-        if(!creep.memory[job] && creep.carry.energy == creep.carryCapacity) {
-            creep.memory[job] = true;
-            creep.say(job);
-        }
     },
     moveTargets: function(creep,targets,task) {
         if(targets.length > 0) {

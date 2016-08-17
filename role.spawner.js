@@ -1,8 +1,8 @@
+var powerUtility = require('behavior.power');
 var roleSpawner = {
     run: function(spawn) {
-        var powered = require('behavior.power');
         if(spawn.memory.powered){
-            powered.run(spawn);
+            powerUtility.buildExtensions(spawn, [20,30,2,2]);
         }
         this.creepLogic(spawn);
     },
@@ -24,16 +24,16 @@ var roleSpawner = {
                 }
                 if(harvesters < utility.limiter('harvesters')){
                     this.creepSpawn(spawn,'harvesters',1);
-                }
-                if(upgraders < utility.limiter('upgraders') && ((upgraders / utility.limiter('upgraders'))* 100) > 60){
+                } else if(upgraders < utility.limiter('upgraders')){
                     this.creepSpawn(spawn,'upgraders',1);
-                }
-                if(builders < utility.limiter('builders') && ((builders / utility.limiter('builders'))* 100) > 60){
+                } else if(builders < utility.limiter('builders')){
                     this.creepSpawn(spawn,'builders',1);
                 }
             }
         }
-
+        if((Game.time % 5) < 1){
+            console.log('[GATHER] ' + harvesters + ' / ' + utility.limiter('harvesters') + ' [UPGRDE] ' + upgraders + ' / ' + utility.limiter('upgraders') + ' [BUILD] ' + builders + ' / ' + utility.limiter('builders') + ' [ENERGY] ' + spawn.room.energyAvailable + ' / ' + spawn.room.energyCapacityAvailable); 
+        }
     },
     creepSpawn: function(spawn, type, size) {
         switch(size) {

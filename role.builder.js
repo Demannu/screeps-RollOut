@@ -1,6 +1,6 @@
+var creepUtility = require('behavior.utility');
 var roleBuilder = {
     run: function(creep) {
-        var creepUtility = require('behavior.utility');
         creepUtility.doWork(creep, "building");
 	    if(creep.memory.building) {
 	        var targets = creep.room.find(FIND_CONSTRUCTION_SITES);

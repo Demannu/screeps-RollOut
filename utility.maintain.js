@@ -1,14 +1,16 @@
 var utility = {
     limiter: function(type) { 
-    	if(type == 'harvesters'){
-            return 4;
-        }
-        if(type == 'builders'){
-            return 2;
-        }
-        if(type == 'upgraders'){
-            return 2;
-        }
+    	switch(type){
+    		case 'harvesters':
+    			return 4;
+    			break;
+    		case 'builders':
+    			return 2;
+    			break;
+    		case 'upgraders':
+    			return 2;
+    			break;
+    	}
     },
     extPOS: function() { return [10,20,3,5]; },     // X,Y,Width,Height of extension field
     
@@ -27,6 +29,9 @@ var utility = {
     },
     findSpecificCreeps: function(type) {
         return _.filter(Game.creeps, (creep) => creep.memory.role == type);
+    },
+    findSources: function(spawn) {
+    	return Game.spawns[spawn].room.find(FIND_SOURCES);
     }
 };
 

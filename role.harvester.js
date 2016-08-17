@@ -1,6 +1,6 @@
+var creepUtility = require('behavior.utility');
 var roleHarvester = {
     run: function(creep) {
-        var creepUtility = require('behavior.utility');
         if(creep.carry.energy < creep.carryCapacity) {
             creepUtility.findEnergySource(creep);
         }
@@ -15,7 +15,7 @@ var roleHarvester = {
                     creep.moveTo(targets[0]);
                 }
             } else {
-                creep.moveTo(Game.spawns.homeSpawn);
+                creep.moveTo(creepUtility.findEnergyStorage(creep));
             }
         }
     }
