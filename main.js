@@ -1,5 +1,8 @@
 // Demannu Roll-Out Strategy
+<<<<<<< HEAD
 // 8/17/2016; 
+=======
+>>>>>>> origin/master
 
 /* Required Sub-Modules
     Behaviors:
