@@ -30,8 +30,9 @@ var utility = {
     findSpecificCreeps: function(type) {
         return _.filter(Game.creeps, (creep) => creep.memory.role == type);
     },
-    findSources: function(spawn) {
-    	return Game.spawns[spawn].room.find(FIND_SOURCES);
+    findSources: function(room) {
+        console.log(room);
+    	return room.find(FIND_SOURCES);
     }
 };
 

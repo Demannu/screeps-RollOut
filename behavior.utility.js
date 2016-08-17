@@ -16,19 +16,14 @@ var creepUtility = {
         }
     },
     findEnergyStorage: function(creep) {
-        var targets = creep.room.find(FIND_STRUCTURES, {
-            filter: (structure) => {
-                return (structure.structureType == STRUCTURE_EXTENSION || structure.structureType == STRUCTURE_SPAWN);
-            }
-        });
+        var targets = creep.room.find(FIND_STRUCTURES, {filter: (structure) => { return (structure.structureType == STRUCTURE_EXTENSION || structure.structureType == STRUCTURE_SPAWN);} });
         var target = creep.pos.findClosestByRange(targets);
         if(creep.withdraw(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
             creep.moveTo(target);           
         }
-
     },
     findFlags: function(creep) {
-        var result = _(Game.flags).filter({ memory: { taken: false}}).value();
+        var result = _(Game.flags).filter({ memory: { taken: false }}).value();
         return result;
     },
     moveTargets: function(creep,targets,task) {

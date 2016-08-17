@@ -1,5 +1,6 @@
 var powerUtility = {
-    buildExtensions: function(spawn, data) {
+    /* Build a rectange building of predefined size and shape */
+    buildSquare: function(spawn, data, type) {
         var utility = require('utility.maintain');
         var X = data[0];
         var Y = data[1];
@@ -7,12 +8,13 @@ var powerUtility = {
         var H = data[3];
         for(var i = 0; i < W; i++) {
             for(var x = 0; x < H; x++){
-                spawn.room.createConstructionSite((X + i), (Y + x), STRUCTURE_EXTENSION);
+                spawn.room.createConstructionSite((X + i), (Y + x), type);
             }
         }
-    spawn.memory.powered = false;
+        spawn.memory.powered = false;
     },
-    sourceSlots: function(thisSpawner,thisRoom,thisSources) {
+    /* Generate flags in all accessible areas around a source */
+    sourceSlots: function(thisRoom,thisSources) {
         for(var source in thisSources){
             for(var x = -1; x < 2; x++){
                 for(var y = -1; y <2; y++){

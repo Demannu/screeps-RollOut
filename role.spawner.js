@@ -3,7 +3,7 @@ var utility = require('utility.maintain');
 var roleSpawner = {
     run: function(spawn) {
         if(spawn.memory.powered){
-            powerUtility.buildExtensions(spawn, utility.extPOS());
+            powerUtility.buildRectangle(spawn, utility.extPOS(), 'STRUCTURE_EXTENSION');
         }
         this.creepLogic(spawn);
     },

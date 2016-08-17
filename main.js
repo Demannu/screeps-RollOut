@@ -1,12 +1,10 @@
 // Demannu Roll-Out Strategy
-<<<<<<< HEAD
 // 8/17/2016; 
-=======
->>>>>>> origin/master
 
 /* Required Sub-Modules
     Behaviors:
         behavior.utility | Linked within role.*
+        behavior.power
     Creeps:
         role.builder
         role.harvester
@@ -14,13 +12,16 @@
     Spawns:
         role.spawner
     Utility:
-        utility.configure
         utility.maintain
 */
 
 /* Start Instructions
-    Game.spawns.spawnerName.memory.role = 'spawners';
-    Set an energy barrier in configure
+    Place Spawner in Suitable Area
+    > Spawner will automatically produce harvesters
+    >> Harvesters will automatically start gathering and supplying spawn
+    > Once you have a few creeps, configure extPOS in utility.maintain
+    >> Set spawner.memory.powered = true
+    >> It will automatically turn off once the area has been constructed
 */
 var roleBuilder = require('role.builder');
 var roleHarvester = require('role.harvester');
@@ -31,18 +32,21 @@ var powerUtility = require('behavior.power');
 // End Module Requirements
 
 module.exports.loop = function () {
-    for(var spawnName in Game.spawns){
-        var thisSpawner = spawnName;
-        var thisRoom = Game.spawns[thisSpawner].room;
-        var thisSources = utility.findSources(thisSpawner);
+    /* Loop through owned rooms */
+    for(var room in Game.rooms){
+        var thisRoom = Game.rooms[room];
+        console.log(room);
+        console.log(thisRoom);
+        var thisSources = utility.findSources(thisRoom);
         if(!Game.rooms[thisRoom.name].memory.mapped){
-            powerUtility.sourceSlots(thisSpawner,thisRoom,thisSources);
+            powerUtility.sourceSlots(thisRoom,thisSources);
         }
     }
-    /* Attach C&C to Objects */
+    /* Remove dead creeps from memory */
     if((Game.time % 50) < 1){
         utility.sweepCreep();
     }
+    /* Attach handlers to objects */
     var list = ['creeps','spawns'];
     for(var item in list) {
         for(var name in Game[list[item]]) {
