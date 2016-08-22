@@ -1,8 +1,60 @@
+<<<<<<< HEAD
+=======
+Room.prototype.info = function() {
+    return {
+        creepCount: this.find(FIND_MY_CREEPS).length,
+        enemyCreepCount: this.find(FIND_HOSTILE_CREEPS).length,
+        spawnCount: this.find(FIND_MY_SPAWNS).length,
+        enemySpawnCount: this.find(FIND_HOSTILE_SPAWNS).length,
+        sourceCount: this.find(FIND_SOURCES).length
+    }
+},
+
+Room.prototype.creepRatio = function() {
+    return {
+        harvesters: 3,
+        upgraders: 1,
+        builders: 1
+    }
+},
+
+Room.prototype.creepSorted = function() {
+    var foundCreeps = this.find(FIND_MY_CREEPS);
+    return {
+        harvesters: _.filter(foundCreeps, (creep) => creep.memory.role == 'harvester').length,
+        upgraders: _.filter(foundCreeps, (creep) => creep.memory.role == 'upgrader').length,
+        builders: _.filter(foundCreeps, (creep) => creep.memory.role == 'builder').length
+    }
+},
+
+Room.prototype.buildControllerDefense = function() {
+    var center = this.controller.pos;
+    var a = [-2, 2];
+    for(var b in a){
+        var x = a[b];
+        for(var c in a){
+            var y = a[c];
+            this.createConstructionSite((center.pos.x + x), (center.pos.y + y), STRUCTURE_WALL);
+        }
+    }
+},
+
+Room.prototype.manageSources = function(){
+    var sourceList = this.find(FIND_SOURCES);
+    for(var source in sourceList){
+        var sauce = sourceList[source].id;
+        this.memory[sauce] = [];
+        this.memory.mapped = true;
+    }    
+},
+
+>>>>>>> origin/master
 Spawn.prototype.buildCreep = function() {
     if (!this.spawning) {
         var energyPercentage = (this.energy / this.energyCapacity) * 100;
         if (energyPercentage > 75) {
             if (this.room.creepSorted().harvesters < (this.room.creepRatio().harvesters * this.room.controller.level)){
+<<<<<<< HEAD
                 var newCreep = this.createCreep([MOVE,WORK,CARRY,CARRY], undefined, {role: 'harvester'});
             } else if (this.room.creepSorted().upgraders < (this.room.creepRatio().upgraders * this.room.controller.level)){
                 var newCreep = this.createCreep([MOVE,WORK,CARRY,CARRY], undefined, {role: 'upgrader'});
@@ -10,11 +62,19 @@ Spawn.prototype.buildCreep = function() {
                 var newCreep = this.createCreep([MOVE,WORK,CARRY,CARRY], undefined, {role: 'builder'});
             } else if (this.room.creepSorted().upkeepers < (this.room.creepRatio().upkeepers * this.room.controller.level)){
                 var newCreep = this.createCreep([MOVE,WORK,CARRY,CARRY], undefined, {role: 'upkeeper'});
+=======
+                var newCreep = this.createCreep([MOVE, MOVE, WORK, CARRY, CARRY], undefined, {role: 'harvester'});
+            } else if (this.room.creepSorted().upgraders < (this.room.creepRatio().upgraders * this.room.controller.level)){
+                var newCreep = this.createCreep([MOVE, MOVE, WORK, CARRY, CARRY], undefined, {role: 'upgrader'});
+            } else if (this.room.creepSorted().builders < (this.room.creepRatio().builders * this.room.controller.level)){
+                var newCreep = this.createCreep([MOVE, MOVE, WORK, CARRY, CARRY], undefined, {role: 'builder'});
+>>>>>>> origin/master
             }
         }
     }
 },
 
+<<<<<<< HEAD
 Creep.prototype.doWork = function() {
     
 },
@@ -26,12 +86,19 @@ Creep.prototype.harvester = function() {
             data.splice(index, 1);
         }
     }
+=======
+Creep.prototype.harvester = function() {
+>>>>>>> origin/master
     if(this.carry.energy < this.carryCapacity){
         if(!this.memory.assigned){
             var list = this.room.find(FIND_SOURCES_ACTIVE);
             for(var source in list){
                 var input = list[source].id;
+<<<<<<< HEAD
                 if(this.room.memory[input].length < 6){
+=======
+                if(this.room.memory[input].length < 3){
+>>>>>>> origin/master
                     this.room.memory[input].push(this.id);
                     this.memory.sourceID = input;
                     this.memory.assigned = true;
@@ -39,15 +106,23 @@ Creep.prototype.harvester = function() {
                 }
             }
         } else {
+<<<<<<< HEAD
             var target = Game.getObjectById(this.memory.sourceID);
             if(this.pos.isNearTo(target)){
                 this.harvest(target);
             } else {
                 this.moveTo(target);
+=======
+            if(this.pos.isNearTo(Game.getObjectById(this.memory.sourceID))){
+                this.harvest(Game.getObjectById(this.memory.sourceID));
+            } else {
+                this.moveTo(Game.getObjectById(this.memory.sourceID));
+>>>>>>> origin/master
             }
         }    
     } else {
         var target = this.pos.findClosestByRange(FIND_MY_SPAWNS);
+<<<<<<< HEAD
         if(target.energy < target.energyCapacity) {
             if(this.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                 this.moveTo(target);
@@ -65,6 +140,13 @@ Creep.prototype.harvester = function() {
                 }
             }
         }
+=======
+        if(target) {
+            if(this.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                this.moveTo(target);
+            }
+        } 
+>>>>>>> origin/master
     }
 },
 
@@ -85,6 +167,7 @@ Creep.prototype.upgrader = function() {
 
 Creep.prototype.builder = function() {
     if(this.carry.energy == 0){
+<<<<<<< HEAD
         var targetLook = this.pos.findClosestByRange(FIND_CONSTRUCTION_SITES);
         if(targetLook){
             var targets = this.room.find(FIND_MY_STRUCTURES, {
@@ -101,6 +184,14 @@ Creep.prototype.builder = function() {
         } else {
             this.moveTo(Game.flags.gatherPoint);
         }
+=======
+        var target = this.pos.findClosestByRange(FIND_MY_SPAWNS);
+        if(target) {
+            if(this.withdraw(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                this.moveTo(target);
+            }
+        }    
+>>>>>>> origin/master
     } else {
         if(!this.memory.building){
            var target = this.pos.findClosestByRange(FIND_CONSTRUCTION_SITES);
@@ -114,7 +205,13 @@ Creep.prototype.builder = function() {
                 }
            } else {
                 this.memory.building = false;
+<<<<<<< HEAD
                 this.moveTo(Game.flags.gatherPoint);
+=======
+                if(this.upgradeController(this.room.controller) == ERR_NOT_IN_RANGE) {
+                    this.moveTo(this.room.controller);
+                }
+>>>>>>> origin/master
             } 
         } else {
             if(this.build(Game.getObjectById(this.memory.buildingID)) == -7) {
@@ -129,6 +226,7 @@ Creep.prototype.builder = function() {
         }
         
     }
+<<<<<<< HEAD
 },
 
 Creep.prototype.upkeeper = function() {
@@ -155,3 +253,6 @@ Creep.prototype.upkeeper = function() {
         }
     }
 }
+=======
+}
+>>>>>>> origin/master
