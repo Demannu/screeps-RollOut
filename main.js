@@ -1,8 +1,5 @@
 var startProto = require('global.prototypes');
-<<<<<<< HEAD
 var roomProto = require('room.prototypes');
-=======
->>>>>>> origin/master
 var helper = require('global.helper');
 
 module.exports.loop = function () {
@@ -23,15 +20,12 @@ module.exports.loop = function () {
             helper.sweepMemory();
             break;
         case (75):
-<<<<<<< HEAD
             for(var room in Game.rooms){
                 console.log('Harvesters ' + Game.rooms[room].creepSorted().harvesters);
                 console.log('Upgraders ' + Game.rooms[room].creepSorted().upgraders);
                 console.log('Builders ' + Game.rooms[room].creepSorted().builders);
                 console.log('Upkeepers ' + Game.rooms[room].creepSorted().upkeepers);
             }
-=======
->>>>>>> origin/master
             break;
     }
     var list = ['creeps', 'spawns'];
@@ -44,7 +38,6 @@ module.exports.loop = function () {
             switch(thing.memory.role){
                 case 'spawner':
                     thing.buildCreep();
-<<<<<<< HEAD
                     break;
                 case 'harvester':
                     thing.harvester();
@@ -57,17 +50,6 @@ module.exports.loop = function () {
                     break;
                 case 'upkeeper':
                     thing.upkeeper();
-=======
-                    break;
-                case 'harvester':
-                    thing.harvester();
-                    break;
-                case 'upgrader':
-                    thing.upgrader();
-                    break;
-                case 'builder':
-                    thing.builder();
->>>>>>> origin/master
                     break;
             }
         }
