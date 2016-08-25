@@ -10,10 +10,10 @@ Room.prototype.info = function() {
 
 Room.prototype.creepRatio = function() {
     return {
-        harvesters: 5,
+        harvesters: 4,
         upgraders: 1,
-        builders: 0.5,
-        upkeepers: 0.5
+        builders: 1,
+        upkeepers: 1
     }
 },
 
@@ -27,11 +27,23 @@ Room.prototype.creepSorted = function() {
     }
 },
 
+Room.prototype.findEnergySources = function() {
+    var energySources = this.find(FIND_MY_STRUCTURES);
+    return {
+        spawnOnly: _.filter(energySources, (structure) => structure.type == STRUCTURE_SPAWN),
+        fullOnly: _.filter(energySources, (structure) => structure.energy == structure.energyCapacity),
+        emptyOnly: _.filter(energySources, (structure) => structure.energy == 0),
+        extensions: _.filter(energySources, (structure) => structure.type == STRUCTURE_EXTENSION),
+        all: _.filter(energySources, (structure) => structure.type == STRUCTURE_EXTENSION || STRUCTURE_SPAWN)
+    }
+},
+
 Room.prototype.manageSources = function(){
     var sourceList = this.find(FIND_SOURCES);
+    this.memory.sources = [];
     for(var source in sourceList){
         var sauce = sourceList[source].id;
-        this.memory[sauce] = [];
+        this.memory[sauce];
         this.memory.mapped = true;
     }    
 },

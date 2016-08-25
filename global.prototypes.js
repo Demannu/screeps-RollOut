@@ -3,9 +3,9 @@ Spawn.prototype.buildCreep = function() {
         var energyPercentage = (this.energy / this.energyCapacity) * 100;
         if (energyPercentage > 75) {
             if (this.room.creepSorted().harvesters < (this.room.creepRatio().harvesters * this.room.controller.level)){
-                var newCreep = this.createCreep([MOVE,WORK,CARRY,CARRY], undefined, {role: 'harvester'});
+                var newCreep = this.createCreep([MOVE,WORK,WORK,CARRY,CARRY], undefined, {role: 'harvester'});
             } else if (this.room.creepSorted().upgraders < (this.room.creepRatio().upgraders * this.room.controller.level)){
-                var newCreep = this.createCreep([MOVE,WORK,CARRY,CARRY], undefined, {role: 'upgrader'});
+                var newCreep = this.createCreep([MOVE,WORK,CARRY], undefined, {role: 'upgrader'});
             } else if (this.room.creepSorted().builders < (this.room.creepRatio().builders * this.room.controller.level)){
                 var newCreep = this.createCreep([MOVE,WORK,CARRY,CARRY], undefined, {role: 'builder'});
             } else if (this.room.creepSorted().upkeepers < (this.room.creepRatio().upkeepers * this.room.controller.level)){
@@ -19,11 +19,31 @@ Creep.prototype.run = function() {
     var job = this.memory.role;
     var targetID = (this.memory.assigned ? this.memory.targetID : false);
     var assigned = (this.memory.assigned ? this.memory.assigned : false);
-    if (this.energy !== this.energyCapacity){
-        this.fillEnergy();
+    var deltaDeath = this.ticksToLive;
+    var energySources = this.room.findEnergySources();
+    
+    
+    // Exceptions for harvester
+    if(job === 'harvester') {
+        if(deltaDeath === 1){
+            var data = this.room.memory[targetID];
+            var dataIndex = data.indexOf(this.id);
+            if( index > -1 ) {
+                data.splice(index, 1);
+            }
+            console.log(this.name + ' has died.');
+        }
     }
+    // Add self to this.room.memory.sources[sourceID]
+    
 },
 
+Creep.prototype.workHarvest = function() {
+    var target = this.pos.findClosestByRange(this.room.findEnergySources().spawnOnly);
+    if(this.harvest(target) == ERR_NOT_IN_RANGE) {
+        this.moveTo(target);
+    }
+}
 Creep.prototype.harvestEnergy = function() {
     var sourceList = this.room.find(FIND_SOURCES);
 },
@@ -36,19 +56,12 @@ Creep.prototype.fillEnergy = function() {
 },
 
 Creep.prototype.harvester = function() {
-    if(this.ticksToLive < 2){
-        var data = this.room.memory[this.memory.sourceID];
-        var index = data.indexOf(this.id);
-        if(index > -1) {
-            data.splice(index, 1);
-        }
-    }
     if(this.carry.energy < this.carryCapacity){
         if(!this.memory.assigned){
             var list = this.room.find(FIND_SOURCES_ACTIVE);
             for(var source in list){
                 var input = list[source].id;
-                if(this.room.memory[input].length < 6){
+                if(this.room.memory[input].length < (this.room.creepRatio().harvesters / this.room.info().sourceCount)){
                     this.room.memory[input].push(this.id);
                     this.memory.sourceID = input;
                     this.memory.assigned = true;
@@ -94,15 +107,19 @@ Creep.prototype.upgrader = function() {
             }
         }    
     } else {
-        if(this.upgradeController(this.room.controller) == ERR_NOT_IN_RANGE) {
+        if(this.pos.findInRange(Game.flags.upgradePoint, 2)){
+            if(this.upgradeController(this.room.controller) == ERR_NOT_IN_RANGE) {
                 this.moveTo(this.room.controller);
+            }
+        } else {
+            this.moveTo(Game.flags.upgradePoint);
         }
     }
 },
 
 Creep.prototype.builder = function() {
-    if(this.carry.energy == 0){
-        var targetLook = this.pos.findClosestByRange(FIND_CONSTRUCTION_SITES);
+    if(this.carry.energy < this.carryCapacity){
+        var targetLook = this.pos.findClosestByRange(FIND_MY_STRUCTURES);
         if(targetLook){
             var targets = this.room.find(FIND_MY_STRUCTURES, {
                 filter: { structureType: STRUCTURE_EXTENSION }
@@ -116,7 +133,7 @@ Creep.prototype.builder = function() {
                 }
             }
         } else {
-            this.moveTo(Game.flags.gatherPoint);
+            this.moveTo(Game.flags.gatherPoint.pos);
         }
     } else {
         if(!this.memory.building){
@@ -149,7 +166,7 @@ Creep.prototype.builder = function() {
 },
 
 Creep.prototype.upkeeper = function() {
-    if(this.carry.energy < this.carry.energyCapacity){
+    if(this.carry.energy < this.carryCapacity){
         var targets = this.room.find(FIND_MY_STRUCTURES, {
             filter: { structureType: STRUCTURE_EXTENSION }
         });
@@ -159,6 +176,8 @@ Creep.prototype.upkeeper = function() {
                 if(this.withdraw(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                     this.moveTo(target);
                 }    
+            } else {
+                this.moveTo(Game.flags.gatherPoint);
             }
         }
     } else {
@@ -169,6 +188,8 @@ Creep.prototype.upkeeper = function() {
             if(this.repair(targets[0]) == ERR_NOT_IN_RANGE) {
                 this.moveTo(targets[0]);
             }   
+        } else {
+            this.moveTo(Game.flags.gatherPoint);
         }
     }
 }
