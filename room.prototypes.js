@@ -10,10 +10,12 @@ Room.prototype.info = function() {
 
 Room.prototype.creepRatio = function() {
     return {
-        harvesters: 4,
+        harvesters: 1,
         upgraders: 1,
         builders: 1,
-        upkeepers: 1
+        upkeepers: 1,
+        miners: 1,
+        runners: 2
     }
 },
 
@@ -23,7 +25,9 @@ Room.prototype.creepSorted = function() {
         harvesters: _.filter(foundCreeps, (creep) => creep.memory.role == 'harvester').length,
         upgraders: _.filter(foundCreeps, (creep) => creep.memory.role == 'upgrader').length,
         builders: _.filter(foundCreeps, (creep) => creep.memory.role == 'builder').length,
-        upkeepers: _.filter(foundCreeps, (creep) => creep.memory.role == 'upkeeper').length
+        upkeepers: _.filter(foundCreeps, (creep) => creep.memory.role == 'upkeeper').length,
+        miners: _.filter(foundCreeps, (creep) => creep.memory.role == 'miner').length,
+        runners: _.filter(foundCreeps, (creep) => creep.memory.role == 'runner').length
     }
 },
 

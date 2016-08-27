@@ -1,5 +1,6 @@
 var startProto = require('global.prototypes');
 var roomProto = require('room.prototypes');
+var creepProto = require('creep.prototypes');
 var helper = require('global.helper');
 
 module.exports.loop = function () {
@@ -13,18 +14,17 @@ module.exports.loop = function () {
     var time = Game.time;
     switch(time % 100){
         case (0):
-            break;
         case (25):
-            break;
         case (50):
             helper.sweepMemory();
-            break;
         case (75):
             for(var room in Game.rooms){
                 console.log('Harvesters ' + Game.rooms[room].creepSorted().harvesters);
                 console.log('Upgraders ' + Game.rooms[room].creepSorted().upgraders);
                 console.log('Builders ' + Game.rooms[room].creepSorted().builders);
                 console.log('Upkeepers ' + Game.rooms[room].creepSorted().upkeepers);
+                console.log('Miners ' + Game.rooms[room].creepSorted().miners);
+                console.log('Runners ' + Game.rooms[room].creepSorted().runners);
             }
             break;
     }
@@ -50,6 +50,12 @@ module.exports.loop = function () {
                     break;
                 case 'upkeeper':
                     thing.upkeeper();
+                    break;
+                case 'miner':
+                    thing.miner();
+                    break;
+                case 'runner':
+                    thing.runner();
                     break;
             }
         }
