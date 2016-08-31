@@ -1,118 +1,144 @@
-Room.prototype.info = function() {
-    return {
-        creepCount: this.find(FIND_MY_CREEPS).length,
-        enemyCreepCount: this.find(FIND_HOSTILE_CREEPS).length,
-        spawnCount: this.find(FIND_MY_SPAWNS).length,
-        enemySpawnCount: this.find(FIND_HOSTILE_SPAWNS).length,
-        sourceCount: this.find(FIND_SOURCES).length
+Room.prototype.configure = function() {
+    var sources = this.getSources();
+    var mySpawns = this.getSpawns();
+    var controller = this.controller;
+    this.memory.renew = [];
+    this.memory.tier = 0;
+    for(let source in sources){
+        source = sources[source];
+        var spawn = mySpawns[0].pos;
+        this.memory[source.id] = [];
+        this.memory['path_' + source.id] = this.findPath(source.pos, spawn);
+        this.memory['slots_' + source.id] = [];
+        this.plotSource(source);
     }
+    this.createRoads(this.findTerrain(this.controller, 1, 1));
+    this.memory.initalized = true;
 },
-
-Room.prototype.creepRatio = function() {
-    return {
-        harvesters: 1,
-        upgraders: 1,
-        builders: 1,
-        upkeepers: 1,
-        miners: 1,
-        runners: 2
+Room.prototype.computeTier = function() {
+    var sources = this.getSources();
+    var roomLevel = this.controller.level;
+    var extensionLimit;
+    switch(roomLevel){
+        case 1:
+            extensionLimit =  0;
+            break;
+        case 2:
+            extensionLimit = 5;
+            break;
+        case 3:
+            extensionLimit = 10;
+            break;
+        case 4:
+            extensionLimit = 20;
+            break;
+        case 5:
+            extensionLimit = 30;
+            break;
+        case 6:
+            extensionLimit = 40;
+            break;
+        case 7:
+            extensionLimit = 50;
+            break;
     }
+    var hasContainers = this.find(FIND_MY_STRUCTURES, {
+        filter: (s) => s.structureType == STRUCTURE_CONTAINER
+    });
+    var hasStorage = this.find(FIND_MY_STRUCTURES, {
+        filter: (s) => s.structureType == STRUCTURE_STORAGE
+    });
+    var hasExtensions = this.find(FIND_MY_STRUCTURES, {
+        filter: (s) => s.structureType == STRUCTURE_EXTENSION
+    });
+    var fullHarvester = (this.selectCreeps('harvester').length = this.limitCreeps('harvester') ? true : false);
+    var fullEnergy = (this.energyAvailable = this.energyCapacityAvailable ? true: false);
+    var fullExtensions = (hasExtensions.length = extensionLimit ? true : false);
+    // setup tier 1 (container setup)
+    if(fullHarvester && fullExtensions && fullEnergy && (roomLevel = 2)){
+        this.memory.tier = 1;
+    } 
 },
-
-Room.prototype.creepSorted = function() {
-    var foundCreeps = this.find(FIND_MY_CREEPS);
-    return {
-        harvesters: _.filter(foundCreeps, (creep) => creep.memory.role == 'harvester').length,
-        upgraders: _.filter(foundCreeps, (creep) => creep.memory.role == 'upgrader').length,
-        builders: _.filter(foundCreeps, (creep) => creep.memory.role == 'builder').length,
-        upkeepers: _.filter(foundCreeps, (creep) => creep.memory.role == 'upkeeper').length,
-        miners: _.filter(foundCreeps, (creep) => creep.memory.role == 'miner').length,
-        runners: _.filter(foundCreeps, (creep) => creep.memory.role == 'runner').length
-    }
+Room.prototype.getSources = function() {
+    var sources = this.find(FIND_SOURCES);
+    return sources;
 },
-
-Room.prototype.findEnergySources = function() {
-    var energySources = this.find(FIND_MY_STRUCTURES);
-    return {
-        spawnOnly: _.filter(energySources, (structure) => structure.type == STRUCTURE_SPAWN),
-        fullOnly: _.filter(energySources, (structure) => structure.energy == structure.energyCapacity),
-        emptyOnly: _.filter(energySources, (structure) => structure.energy == 0),
-        extensions: _.filter(energySources, (structure) => structure.type == STRUCTURE_EXTENSION),
-        all: _.filter(energySources, (structure) => structure.type == STRUCTURE_EXTENSION || STRUCTURE_SPAWN)
-    }
-},
-
-Room.prototype.manageSources = function(){
-    var sourceList = this.find(FIND_SOURCES);
-    this.memory.sources = [];
-    for(var source in sourceList){
-        var sauce = sourceList[source].id;
-        this.memory[sauce];
-        this.memory.mapped = true;
-    }    
-},
-
-Room.prototype.taskManager = function() {
-    console.log('running');
-    // this will manage adding and removing tasks from the memory 
-    // find buildings needing repair
-    if(!this.memory.tasks){
-        console.log('empty array');
-        this.memory.tasks = [];
-    }
-    var constructionList = this.find(FIND_CONSTRUCTION_SITES);
-    var structureList = this.find(FIND_MY_STRUCTURES);
-    for(construct in constructionList){
-        console.log('construct');
-        if(this.memory.tasks == []){
-            console.log('task less than 0');
-            this.taskBuild(constructionList[construct]);
-        } else {
-            console.log('it passed');
-            for(task in this.memory.tasks){
-            console.log(this.memory.tasks[task][0] != constructionList[construct].id);
-                if(this.memory.tasks[task][0] != constructionList[construct].id){
-                    //this.taskBuild(constructionList[construct]);
-                    console.log('Buiulding Something');
-                }    
-            }   
-        }
-    }
-    for(structure in structureList){
-        var structure = structureList[structure];
-        for(task in this.memory.tasks){
-            if(this.memory.tasks[task][0] != structure.id){
-               if((structure.hits / structure.hitsMax) < .85){
-                    this.taskRepair(structure);
-                }
-            }    
+Room.prototype.getOpenSource = function() {
+    var sources = this.getSources();
+    var openSources = [];
+    for(let source in sources){
+        source = sources[source];
+        if(this.memory[source.id].length < this.memory['slots_' + source.id].length){
+            return source.id;
         }
     }
 },
-
-Room.prototype.taskAdd = function(buildingID, action) {
-    // this will add a task (ran from taskManager)
-    this.memory.tasks.push([buildingID, action]);
+Room.prototype.getSpawns = function() {
+    var spawns = this.find(FIND_MY_SPAWNS);
+    return spawns;
 },
-
-Room.prototype.taskRepair = function(object) {
-    var priority;
-    switch(object.structureType){
-        case STRUCTURE_WALL:
-        case STRUCTURE_TOWER:
-            priority = 2;
+Room.prototype.selectCreeps = function(type) {
+    var result = this.find(FIND_MY_CREEPS, {
+        filter: (c) => c.memory.role == type
+    });
+    return result;
+},
+Room.prototype.limitCreeps = function(type) {
+    var result;
+    switch (type){
+        case 'harvester':
+            result = this.getSources().length * this.controller.level;
             break;
-        case STRUCTURE_SPAWN:
-            priority = 3;
+        case 'upgrader':
+            if(this.controller.level > 4){
+                result = 6;
+            } else {
+                result = Math.floor(this.controller.level * 1.5);                
+            }
+            break;
+        case 'builder':
+            result = Math.floor(this.selectCreeps('harvester').length * .25);
             break;
     }
-    this.taskAdd(object.id, 'repair', priority);
+    return result;
 },
-
-Room.prototype.taskBuild = function(item) {
-    if(item.structureType = STRUCTURE_WALL || STRUCTURE_EXTENSION){
-        var priority = 1;
+Room.prototype.setEnergyOrders = function() {
+    var data = this.find(FIND_MY_STRUCTURES, {
+        filter: (obj) => obj.structureType == STRUCTURE_SPAWN || obj.structureType == STRUCTURE_EXTENSION && obj.energy < obj.energyCapacity
+    });
+    data.sort((a,b) => a.energy - b.energy);
+    for(let item in data){
+        item = data[item];
+        if(item.structureType == STRUCTURE_SPAWN){
+            this.memory['needsEnergy'] = item.id;
+            break;
+        }
     }
-    this.taskAdd(item.id, 'build', priority);
+    this.memory['needsEnergy'] = data[0].id;
+},
+Room.prototype.plotSource = function(source) {
+    var data = this.findTerrain(source, 1, 1);
+    var result = [];
+    for(let obj in data){
+        obj = data[obj];
+        if(obj.terrain === 'plain'){
+            this.memory['slots_' + source.id].push({x: obj.x, y: obj.y});
+            result.push({x: obj.x, y: obj.y});
+        }
+    }
+    this.createRoads(result);
+    this.createRoads(this.memory['path_' + source.id]);
+},
+Room.prototype.createRoads = function(array) {
+    for(let position in array){
+        position = array[position];
+        this.create(position['x'], position['y'], STRUCTURE_ROAD);
+    }
+},
+Room.prototype.findTerrain = function(obj, h, w) {
+    var data = this.lookForAtArea(LOOK_TERRAIN, (obj.pos.y - h), (obj.pos.x - w), (obj.pos.y + h), (obj.pos.x + w), true);
+    return data;
+},
+Room.prototype.create = function(x, y, type){
+    this.createConstructionSite(x,y, type);
 }
-

@@ -1,63 +1,33 @@
-var startProto = require('global.prototypes');
-var roomProto = require('room.prototypes');
-var creepProto = require('creep.prototypes');
-var helper = require('global.helper');
+var prototypes = ['room', 'creep', 'spawn', 'tower'];
+for(let obj in prototypes){
+    require([prototypes[obj]] + '.prototypes');
+}
 
 module.exports.loop = function () {
-    for(var room in Game.rooms){
-        if(!Game.rooms[room].memory.mapped){
-            Game.rooms[room].manageSources();
+    // Source Setup
+    // Requires: room.memory.sourceID
+    // Requires: room.memory.path_sourceID
+    // Look for all sources in a room, determine free spaces, set source limit to free space, find path from source to spawn and store it
+    for(let room in Game.rooms){
+        room = Game.rooms[room];
+        if(!room.memory.initalized && room.controller.owner['username'] === 'Demannu'){
+            console.log('running');
+            room.configure();
+        } else if(room.controller.owner['username'] === 'Demannu' && (Game.time - room.memory.energyTick) > 10){
+            room.setEnergyOrders();
+            room.memory.energyTick = Game.time;
         }
-        //Game.rooms[room].taskManager();
     }
-    /* Execute commands at specific intervals */
-    var time = Game.time;
-    switch(time % 100){
-        case (0):
-        case (25):
-        case (50):
-            helper.sweepMemory();
-        case (75):
-            for(var room in Game.rooms){
-                console.log('Harvesters ' + Game.rooms[room].creepSorted().harvesters);
-                console.log('Upgraders ' + Game.rooms[room].creepSorted().upgraders);
-                console.log('Builders ' + Game.rooms[room].creepSorted().builders);
-                console.log('Upkeepers ' + Game.rooms[room].creepSorted().upkeepers);
-                console.log('Miners ' + Game.rooms[room].creepSorted().miners);
-                console.log('Runners ' + Game.rooms[room].creepSorted().runners);
-            }
-            break;
-    }
-    var list = ['creeps', 'spawns'];
-    for(var item in list){
-        for(var name in Game[list[item]]){
-            var thing = Game[list[item]][name];
-            if (list[item] == 'spawns') {
-                thing.memory.role = 'spawner';
-            }
-            switch(thing.memory.role){
-                case 'spawner':
-                    thing.buildCreep();
-                    break;
-                case 'harvester':
-                    thing.harvester();
-                    break;
-                case 'upgrader':
-                    thing.upgrader();
-                    break;
-                case 'builder':
-                    thing.builder();
-                    break;
-                case 'upkeeper':
-                    thing.upkeeper();
-                    break;
-                case 'miner':
-                    thing.miner();
-                    break;
-                case 'runner':
-                    thing.runner();
-                    break;
-            }
+    for(let spawn in Game.spawns){
+        spawn = Game.spawns[spawn];
+        if(!spawn.memory.initalized){
+            spawn.configure();
+        }
+        if(spawn.room.memory.renew.length > -1){
+            spawn.renew();
+        }
+        if(!spawn.spawning){
+            spawn.creepManager();
         }
     }
 }
